@@ -4,8 +4,32 @@ import Bio
 from Bio import SeqIO
 import numpy as np
 
+#this function reads a FASTA file (given the filename) and returns its contents as a dictionary
+#where each seq in the file is represented as a key-value pair
+#The key is the seq header (everything that folllows '>') and the value is the sequence itself
+def read_FASTA(filename):
+    records_dict = {}
+    for seq_record in SeqIO.parse(filename, "fasta"):
+        records_dict[seq_record.id] = seq_record.seq        
+    return records_dict
+
+#this function reads a substitution matrix from a file and returns its contents in a 4x4 matrix 
+#Assumptions: the subst matrix is in phylip-like format in a txt file
+#             the matrix is only DNA and the nucleotides are in the order: A,C,G,T
+def read_subst_mtrx(filename):
+    subst_mat = np.zeros((4,4))
+    f = open(filename,'r')
+    f.readline()
+    for i in range(0,4):
+        line = f.readline()
+        nums_in_line = line.split()
+        for j in range(1,5):
+            subst_mat[i,j-1] = nums_in_line[j]
+    f.close()
+    return subst_mat 
+
 #this function returns the cost of an optimal alignment of seq1 and seq2 
-#based on scores in the subst_mat and affine gapcost with parameters
+#based on scores in the subst_mat and affine gapcost with parameters a and b
 def cost_affine(seq1,seq2,subst_mat,a,b):
     m = len(seq1)
     n = len(seq2)
@@ -14,7 +38,7 @@ def cost_affine(seq1,seq2,subst_mat,a,b):
     I = np.full([m+1,n+1], None)
     D = np.full([m+1,n+1], None)
     
-    dict_subst = {"a":0, "c": 1, "g":2, "t":3}
+    dict_subst = {"A":0, "C": 1, "G":2, "T":3}
     
     for i in range(0, m+1):
         for j in range(0, n+1):
@@ -47,14 +71,14 @@ def cost_affine(seq1,seq2,subst_mat,a,b):
             S[i,j] = min(v1,v2,v3,v4)        
     return S
 
-#this functionreturns the optimal alignment of seq1 and seq2 
+#this function returns the optimal alignment of seq1 and seq2 
 #based on the previously calculated S matrix given scores in the subst_mat and affine gapcost with parameters a and b
 def backtrack_affine(seq1,seq2,S,subst_mat,a,b):
     i = len(seq1)
     j = len(seq2)
     align1 = ""
     align2 = ""
-    dict_subst = {"a":0, "c": 1, "g":2, "t":3}
+    dict_subst = {"A":0, "C": 1, "G":2, "T":3}
     while (i>0 or j>0):
         if (i>0 and j>0) and (S[i,j] == S[i-1,j-1] + subst_mat[dict_subst[seq1[i-1]], dict_subst[seq2[j-1]]]):
             align1 = seq1[i-1] + align1
@@ -84,40 +108,12 @@ def backtrack_affine(seq1,seq2,S,subst_mat,a,b):
                     k = k+1
     return align1, align2
 
-#this function reads a FASTA file (given the filename) and returns its contents as a dictionary
-#where each seq in the file is represented as a key-value pair
-#The key is the seq header (everything that folllows '>') and the value is the sequence itself
-def read_FASTA(filename):
-    records_dict = {}
-    for seq_record in SeqIO.parse(filename, "fasta"):
-        records_dict[seq_record.id] = seq_record.seq        
-    return records_dict
-
-#this function reads a substitution matrix from a file and returns its contants in 4x4 matrix 
-#Assumptions: the subst matrix is in phylip-like format in a txt file
-#             the matrix is only DNA and the nucleotides are in the order: A,C,G,T
-#therefore it "skips" the first line completely and first (non-whitespace) character of every other line following the first one
-def read_subst_mtrx(filename):
-    subst_mat = np.zeros((4,4))
-    #skipping the first line
-    f = open(filename,'r')
-    f.readline()
-    for i in range(0,4):
-        line = f.readline()
-        nums_in_line = line.split()
-        for j in range(1,5):
-            subst_mat[i,j-1] = nums_in_line[j]
-    f.close()
-    return subst_mat 
-
 #this function given two parts of an alignment prints the alignment in the FASTA format
 def FASTA_out(align1,align2):
     print(">seq1")
     print(align1)
-    print()
     print(">seq2")
     print(align2) 
-    print()
 
 #this function wraps all the other ones, this function will be called by the user
 #it takes in 6 params:
@@ -126,8 +122,14 @@ def FASTA_out(align1,align2):
 #            a,b ........................... affine gapcost coefficients (g(k)=a+bk)
 #            align ......................... boolean value (True,False) which indicates, whether the user wants to output an optimal alignment as well
 def global_affine(seq1_filename,seq2_filename,subst_matrx_filename,a,b,align):
-    seq1 = list(read_FASTA(seq1_filename).values())[0].lower()
-    seq2 = list(read_FASTA(seq2_filename).values())[0].lower()
+    if len(seq1_filename)>5 and seq1_filename[-5:]=="fasta" : 
+        seq1 = list(read_FASTA(seq1_filename).values())[0].upper()
+    else: 
+        seq1 = seq1_filename.upper()
+    if len(seq2_filename)>5 and seq2_filename[-5:]=="fasta":
+        seq2 = list(read_FASTA(seq2_filename).values())[0].upper()
+    else: 
+        seq2 = seq2_filename.upper()
     
     subst_mat = read_subst_mtrx(subst_matrx_filename)
 
@@ -164,11 +166,7 @@ else:
     subst_m = sys.argv[3]
     a = int(sys.argv[4])
     b = int(sys.argv[5])
-#print(seq1)
-#print(seq2)
-#print(subst_m)
-#print(a)
-#print(b)
+
 global_affine(seq1, seq2,subst_m,a,b,align)
 
 
