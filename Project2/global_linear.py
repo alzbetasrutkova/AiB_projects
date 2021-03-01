@@ -9,9 +9,6 @@ def read_FASTA(filename):
         records_dict[seq_record.id] = seq_record.seq        
     return records_dict
 
-#this function reads a substitution matrix from a file and returns its contents in a 4x4 matrix 
-#Assumptions: the subst matrix is in phylip-like format in a txt file
-#             the matrix is only DNA and the nucleotides are in the order: A,C,G,T
 def read_subst_mtrx(filename):
     subst_mat = np.zeros((4,4))
     f = open(filename,'r')
