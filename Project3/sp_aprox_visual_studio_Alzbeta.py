@@ -12,12 +12,16 @@ def star_align(S, gap_cost,subst_mat):
     n = len(S1)
     m =  len(S[0])
     T = np.full([n+1,m+1], None)
+    #unfortunately calculating the cost again:/
     global_linear_cost(S1,S[0],gap_cost,subst_mat,T,n,m)
+    #finding the optimal alignment between the center seq and another seq
     A = IterBackTrack(S1,S[0],gap_cost,subst_mat,T)
+    #transposing the result, so that I work with columns rather than rows
     A = np.transpose(A)
     #print(A[1][0])
     #print(A.tranpose)
-    #M = extend(M,A)
+    M = extend(M,A)
+    print(M)
     '''
     for i in range(0,len(S)):
         A = RecurBackTrack(S1,S[i])
@@ -25,6 +29,7 @@ def star_align(S, gap_cost,subst_mat):
     return M
     '''
 
+#helper function which splits an array arr to smaller arrays of a given size
 def split_arr(arr, size):
  arrs = []
  while len(arr) > size:
@@ -51,6 +56,7 @@ def find_center_seq(S, gap_cost, subst_mat):
     S = [i for i in S if not np.array_equal(i, S1)]
     return S1,S
 
+#helper function, which finds the index of an array which holds the smallest value of that array
 def smallest(arr): 
     min = arr[0] 
     min_idx = 0
@@ -61,12 +67,26 @@ def smallest(arr):
     return min_idx
 
 def extend(M,A):
+    i=j=0
     #take care of the case, when you run out of one of the alignments -> add gaps
-    while(i>=0 and j>=0):
-        if M[0][i] == '_' and A[0][i] != '_':
-            M_temp = []
-            for k in range(0,len(M)-1):
-                pass
+    while(i<len(M) and j<len(A)):
+        if M[i][0] == '_' and A[j][0] == '_':
+            M[i].append(A[j][1])
+            i = i+1
+            j = j+1
+        elif M[i][0] == '_' and A[j][0] != '_':
+            M[i].append('_')
+            i = i+1
+        elif M[i][0] != '_' and A[j][0] == '_':
+            gap_column = np.full([len(M[i])], '_')
+            M.insert(i,gap_column)
+            j = j+1
+        elif M[i][0] != '_' and A[j][0] != '_':
+            M[i].append(A[j][1])
+            i = i+1
+            j = j+1
+    if i<len(M)
+    return M
 
 
 def global_linear_cost(seq1, seq2, gap_cost, subst_mat, L, i, j):
@@ -128,3 +148,5 @@ subst_mat = np.array([
 #print(S1)
 #print(S_rest)
 star_align(S,5,subst_mat)
+#L = np.full([n+1,m+1], None)
+
