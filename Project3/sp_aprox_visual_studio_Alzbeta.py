@@ -7,6 +7,7 @@ def star_align(S, gap_cost,subst_mat):
     #print(S)
     #initialize M with the center seq:
     M = split_arr(S1,1)
+    '''
     print(M)    
     #print(M[0][0])
     n = len(S1)
@@ -24,10 +25,17 @@ def star_align(S, gap_cost,subst_mat):
     print(M)
     '''
     for i in range(0,len(S)):
-        A = RecurBackTrack(S1,S[i])
+        n = len(S1)
+        m =  len(S[0])
+        T = np.full([n+1,m+1], None)
+        #unfortunately calculating the cost again:/
+        global_linear_cost(S1,S[0],gap_cost,subst_mat,T,n,m)
+        #finding the optimal alignment between the center seq and another seq
+        A = IterBackTrack(S1,S[0],gap_cost,subst_mat,T)
+        #transposing the result, so that I work with columns rather than rows
+        A = np.transpose(A)
         M = extend(M,A)
     return M
-    '''
 
 #helper function which splits an array arr to smaller arrays of a given size
 def split_arr(arr, size):
@@ -79,13 +87,23 @@ def extend(M,A):
             i = i+1
         elif M[i][0] != '_' and A[j][0] == '_':
             gap_column = np.full([len(M[i])], '_')
-            M.insert(i,gap_column)
+            M.insert(i,gap_column,tolist())
             j = j+1
         elif M[i][0] != '_' and A[j][0] != '_':
             M[i].append(A[j][1])
             i = i+1
             j = j+1
-    if i<len(M)
+    if i<len(M):
+        while i<len(M):
+            M[i].append('_')
+            i = i+1
+    if j<len(A):
+        while j<len(A):
+            gap_column = np.full([len(M[0])], '_')
+            np.append(gap_column, A[j])
+            M.append(gap_column.tolist())
+            j = j+1
+            
     return M
 
 
@@ -147,6 +165,7 @@ subst_mat = np.array([
 #print(S)
 #print(S1)
 #print(S_rest)
-star_align(S,5,subst_mat)
+alignment = star_align(S,5,subst_mat)
+print(alignment)
 #L = np.full([n+1,m+1], None)
 
