@@ -1,5 +1,7 @@
 import numpy as np
 import sys
+import Bio
+from Bio import SeqIO
 
 def star_align(S, gap_cost,subst_mat):
     S1,S = find_center_seq(S, gap_cost, subst_mat)
@@ -7,23 +9,6 @@ def star_align(S, gap_cost,subst_mat):
     #print(S)
     #initialize M with the center seq:
     M = split_arr(S1,1)
-    '''
-    print(M)    
-    #print(M[0][0])
-    n = len(S1)
-    m =  len(S[0])
-    T = np.full([n+1,m+1], None)
-    #unfortunately calculating the cost again:/
-    global_linear_cost(S1,S[0],gap_cost,subst_mat,T,n,m)
-    #finding the optimal alignment between the center seq and another seq
-    A = IterBackTrack(S1,S[0],gap_cost,subst_mat,T)
-    #transposing the result, so that I work with columns rather than rows
-    A = np.transpose(A)
-    #print(A[1][0])
-    #print(A.tranpose)
-    M = extend(M,A)
-    print(M)
-    '''
     for i in range(0,len(S)):
         n = len(S1)
         m =  len(S[0])
@@ -76,7 +61,6 @@ def smallest(arr):
 
 def extend(M,A):
     i=j=0
-    #take care of the case, when you run out of one of the alignments -> add gaps
     while(i<len(M) and j<len(A)):
         if M[i][0] == '_' and A[j][0] == '_':
             M[i].append(A[j][1])
@@ -93,6 +77,7 @@ def extend(M,A):
             M[i].append(A[j][1])
             i = i+1
             j = j+1
+    #take care of the case, when you run out of one of the alignments -> add gaps
     if i<len(M):
         while i<len(M):
             M[i].append('_')
@@ -147,6 +132,23 @@ def IterBackTrack(seq1, seq2, gap_cost, subst_mat, T):
         else: break
     return [list(align1), list(align2)]    
 
+def read_FASTA(filename):
+    records_dict = {}
+    for seq_record in SeqIO.parse(filename, "fasta"):
+        records_dict[seq_record.id] = seq_record.seq        
+    return records_dict
+
+def read_subst_mtrx(filename):
+    subst_mat = np.zeros((4,4))
+    f = open(filename,'r')
+    f.readline()
+    for i in range(0,4):
+        line = f.readline()
+        nums_in_line = line.split()
+        for j in range(1,5):
+            subst_mat[i,j-1] = nums_in_line[j]
+    f.close()
+    return subst_mat 
 
 ### main ###
 
@@ -161,11 +163,9 @@ subst_mat = np.array([
         [5,2,5,0]
     ])
 
-#S1, S_rest = find_center_seq(S,5,subst_mat)
-#print(S)
-#print(S1)
-#print(S_rest)
 alignment = star_align(S,5,subst_mat)
 print(alignment)
-#L = np.full([n+1,m+1], None)
+
+#What is left here: test if it works
+#                   make it runable from command line 
 
