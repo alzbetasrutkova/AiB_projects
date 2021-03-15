@@ -69,15 +69,28 @@ def extend(M,A):
         elif M[i][0] == '_' and A[j][0] != '_':
             M[i].append('_')
             i = i+1
+        #HERE IS THE PROBLEM
         elif M[i][0] != '_' and A[j][0] == '_':
+            c = np.full([len(M[i])], '_', dtype=object)
+            ch = A[j][1]
+            #c = np.append(c,ch)
+            print(c)
+            M.insert(i,c.tolist())
+            '''
             gap_column = np.full([len(M[i])], '_')
-            M.insert(i,gap_column,tolist())
+            print(gap_column)
+            gap_column = np.append(gap_column,A[j][1])
+            #gap_column.append(A[j][1])
+            print(gap_column)
+            M.insert(i,gap_column.tolist())
+            '''
             j = j+1
         elif M[i][0] != '_' and A[j][0] != '_':
             M[i].append(A[j][1])
             i = i+1
             j = j+1
     #take care of the case, when you run out of one of the alignments -> add gaps
+    #HERE WILL PROBABLY BE THE SAME PROBLEM
     if i<len(M):
         while i<len(M):
             M[i].append('_')
@@ -152,9 +165,10 @@ def read_subst_mtrx(filename):
 
 ### main ###
 
-S = [['A','A','C','T','G'], 
-    ['A','C','C','T'],
-    ['A','C','T']]
+S = [['G','T','T','C','C','G','A','A','A','G','G','C','T','A','G','C','G','C','T','A','G','G','C','G','C','C'], 
+    ['A','T','G','G','A','T','T','T','A','T','C','T','G','C','T','C','T','T','C','G'],
+    ['T','G','C','A','T','G','C','T','G','A','A','A','C','T','T','C','T','C','A','A','C','C','A']]
+
 
 subst_mat = np.array([
         [0,5,2,5],
@@ -164,8 +178,16 @@ subst_mat = np.array([
     ])
 
 alignment = star_align(S,5,subst_mat)
-print(alignment)
+alignment = np.transpose(alignment)
 
-#What is left here: test if it works
+M_str = []
+for i in range(0,3):
+    print(''.join(alignment[i]))
+
+print(M_str)
+
+
+#What is left here: debug the extend() method
+#                   test if it works
 #                   make it runable from command line 
 
