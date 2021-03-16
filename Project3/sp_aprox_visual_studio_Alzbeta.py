@@ -4,21 +4,22 @@ import Bio
 from Bio import SeqIO
 
 def star_align(seqs,subst_m, gap_cost):
+    #load in data
     subst_mat = read_subst_mtrx(subst_m)
     S = dic_to_list(read_FASTA(seqs))
     
     S1,S = find_center_seq(S, gap_cost, subst_mat)
-    #initialize M with the center seq:
-    #print("the center seq:")
+    #print("the center seq is:")
     #print(S1)
     #print("the rest of the seqs:")
     #print(S)
+    #initialize M with the center seq:
     M = split_arr(S1,1)
     for i in range(0,len(S)):
         n = len(S1)
         m =  len(S[i])
         T = np.full([n+1,m+1], None)
-        #unfortunately calculating the cost again:/
+        #unfortunately calculating the cost again (this has already been calculated in find_the_center_seq())
         global_linear_cost(S1,S[i],gap_cost,subst_mat,T,n,m)
         #finding the optimal alignment between the center seq and another seq
         A = IterBackTrack(S1,S[i],gap_cost,subst_mat,T)
@@ -36,7 +37,7 @@ def dic_to_list(d):
         l.append(list(seq))
     return l
 
-#helper function which splits an array arr to smaller arrays of a given size
+#helper function which splits an array to smaller arrays of a given size
 def split_arr(arr, size):
  arrs = []
  while len(arr) > size:
@@ -48,7 +49,7 @@ def split_arr(arr, size):
 
 #this will return S1 and the rest of the seqs in a matrix
 def find_center_seq(S, gap_cost, subst_mat):
-    #this will hold sum of scores for each seq, between itself and the other ones
+    #this holds sum of scores for each seq, between itself and the other ones
     scores = np.zeros([len(S)])
     for i in range(0,len(S)):
         for j in range(i+1,len(S)):
@@ -63,7 +64,7 @@ def find_center_seq(S, gap_cost, subst_mat):
     S = [i for i in S if not np.array_equal(i, S1)]
     return S1,S
 
-#helper function, which finds the index of an array which holds the smallest value of that array
+#helper function, which finds the index which holds the smallest value of that array
 def smallest(arr): 
     min = arr[0] 
     min_idx = 0
@@ -76,32 +77,32 @@ def smallest(arr):
 def extend(M,A):
     i=j=0
     while(i<len(M) and j<len(A)):
-        if M[i][0] == '_' and A[j][0] == '_':
+        if M[i][0] == '-' and A[j][0] == '-':
             M[i].append(A[j][1])
             i = i+1
             j = j+1
-        elif M[i][0] == '_' and A[j][0] != '_':
-            M[i].append('_')
+        elif M[i][0] == '-' and A[j][0] != '-':
+            M[i].append('-')
             i = i+1
-        elif M[i][0] != '_' and A[j][0] == '_':
-            new_column = np.full([len(M[i])], '_', dtype=object)
+        elif M[i][0] != '-' and A[j][0] == '-':
+            new_column = np.full([len(M[i])], '-', dtype=object)
             new_column = np.append(new_column,A[j][1])
             M.insert(i,new_column.tolist())
             j = j+1
-            #because I actually shifted the order while inserting
+            #because I actually shifted the order while inserting -> I also need to i = i+1
             i = i+1
-        elif M[i][0] != '_' and A[j][0] != '_':
+        elif M[i][0] != '-' and A[j][0] != '-':
             M[i].append(A[j][1])
             i = i+1
             j = j+1
     #take care of the case, when you run out of one of the alignments -> add gaps
     if i<len(M):
         while i<len(M):
-            M[i].append('_')
+            M[i].append('-')
             i = i+1
     if j<len(A):
         while j<len(A):
-            new_column = np.full([len(M[0])-1], '_', dtype=object)
+            new_column = np.full([len(M[0])-1], '-', dtype=object)
             new_column = np.append(new_column, A[j][1])
             M.append(new_column.tolist())
             j = j+1            
@@ -125,10 +126,8 @@ def global_linear_cost(seq1, seq2, gap_cost, subst_mat, L, i, j):
 
 def IterBackTrack(seq1, seq2, gap_cost, subst_mat, T):
     dict_subst = {"A":0, "C": 1, "G":2, "T":3}
-
     i = len(seq1)
     j = len(seq2)
-
     align1=align2=""
 
     while (i>=0 or j>=0):        
@@ -139,10 +138,10 @@ def IterBackTrack(seq1, seq2, gap_cost, subst_mat, T):
             j=j-1
         elif i>0 and j>=0 and T[i,j]==T[i-1,j]+ gap_cost :
             align1 = seq1[i-1] + align1
-            align2 = "_" + align2
+            align2 = "-" + align2
             i=i-1
         elif i>=0 and j>0 and T[i,j]==T[i,j-1]+gap_cost :
-            align1 = "_" + align1
+            align1 = "-" + align1
             align2 = seq2[j-1] + align2
             j=j-1
         else: break
@@ -166,15 +165,45 @@ def read_subst_mtrx(filename):
     f.close()
     return subst_mat 
 
+#helper function to extract filename without the file extension
+def find_name(seqs):
+    start = seqs.rfind('\\')+1
+    end = seqs.find('.fasta')
+    return seqs[start:end]
+
 ### main ###
-seqs = sys.argv[1]
-subst_m = sys.argv[2]
-gap_cost = int(sys.argv[3])
+write_fasta = False
+
+if len(sys.argv) == 5:
+    write_fasta = True
+
+seqs = ""
+subst_m = ""
+gap_cost = 0
+
+if write_fasta:
+    seqs = sys.argv[2]
+    subst_m = sys.argv[3]
+    a = int(sys.argv[4])
+else:
+    seqs = sys.argv[1]
+    subst_m = sys.argv[2]
+    a = int(sys.argv[3])
 
 alignment = star_align(seqs,subst_m,5)
 alignment = np.transpose(alignment)
 
-for i in range(0,3):
+
+if write_fasta:
+    name = find_name(seqs)
+    f = open(name+'_aligned.fasta','w')
+    for i in range(0,len(alignment)):
+        f.write(">Seq"+str(i+1)+" \n")
+        f.write(''.join(alignment[i])+"\n")
+    f.close()
+
+for i in range(0,len(alignment)):
+    print(">Seq"+str(i+1))
     print(''.join(alignment[i]))
 
 
@@ -202,8 +231,4 @@ alignment = np.transpose(alignment)
 for i in range(0,3):
     print(''.join(alignment[i]))
 '''
-
-#What is left here: 
-#                   test if it works
-#                   make it runable from command line 
 
