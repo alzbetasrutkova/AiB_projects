@@ -6,13 +6,12 @@ from Bio import SeqIO
 def star_align(seqs,subst_m, gap_cost):
     #load in data
     subst_mat = read_subst_mtrx(subst_m)
-    S = dic_to_list(read_FASTA(seqs))
+    seqs_dic = read_FASTA(seqs)
+    S = dic_to_list(seqs_dic)
     
     S1,S = find_center_seq(S, gap_cost, subst_mat)
     #print("the center seq is:")
-    #print(S1)
-    #print("the rest of the seqs:")
-    #print(S)
+    #print(map_back(S1,seqs_dic))
     #initialize M with the center seq:
     M = split_arr(S1,1)
     for i in range(0,len(S)):
@@ -28,7 +27,7 @@ def star_align(seqs,subst_m, gap_cost):
         #transposing the result, so that I work with columns rather than rows
         A = np.transpose(A)
         M = extend(M,A)    
-    return M
+    return M, seqs_dic
     
 #helper function to translate a dictionary into a list of lists
 def dic_to_list(d):
@@ -47,7 +46,7 @@ def split_arr(arr, size):
  arrs.append(arr)
  return arrs
 
-#this will return S1 and the rest of the seqs in a matrix
+#this returns S1 and the rest of the seqs in a matrix
 def find_center_seq(S, gap_cost, subst_mat):
     #this holds sum of scores for each seq, between itself and the other ones
     scores = np.zeros([len(S)])
@@ -171,6 +170,13 @@ def find_name(seqs):
     end = seqs.find('.fasta')
     return seqs[start:end]
 
+#helper function to find the sequence name
+def map_back(seq,dic):
+    seq = ''.join(seq)
+    seq = seq.replace('-',"")
+    inv_dic = {v: k for k, v in dic.items()}
+    return inv_dic[seq]
+
 ### main ###
 write_fasta = False
 
@@ -190,45 +196,21 @@ else:
     subst_m = sys.argv[2]
     a = int(sys.argv[3])
 
-alignment = star_align(seqs,subst_m,5)
+alignment,seqs_dic = star_align(seqs,subst_m,5)
 alignment = np.transpose(alignment)
-
 
 if write_fasta:
     name = find_name(seqs)
     f = open(name+'_aligned.fasta','w')
-    for i in range(0,len(alignment)):
-        f.write(">Seq"+str(i+1)+" \n")
-        f.write(''.join(alignment[i])+"\n")
-    f.close()
 
 for i in range(0,len(alignment)):
-    print(">Seq"+str(i+1))
-    print(''.join(alignment[i]))
+    seq_name = ">"+map_back(alignment[i],seqs_dic)
+    seq_alignment = ''.join(alignment[i])
+    print(seq_name)
+    print(seq_alignment)
+    if write_fasta:
+        f.write(seq_name+" \n")
+        f.write(seq_alignment+"\n")
 
-
-'''
-
-S = [['G','T','T','C','C','G','A','A','A','G','G','C','T','A','G','C','G','C','T','A','G','G','C','G','C','C'], 
-    ['A','T','G','G','A','T','T','T','A','T','C','T','G','C','T','C','T','T','C','G'],
-    ['T','G','C','A','T','G','C','T','G','A','A','A','C','T','T','C','T','C','A','A','C','C','A']]
-
-S = [['A','A','T','C','C','C','C'],
-['G','A','T','C','C','C','C'],
-['A','T']]
-
-
-subst_mat = np.array([
-        [0,5,2,5],
-        [5,0,5,2],
-        [2,5,0,5],
-        [5,2,5,0]
-    ])
-
-alignment = star_align(S,5,subst_mat)
-alignment = np.transpose(alignment)
-
-for i in range(0,3):
-    print(''.join(alignment[i]))
-'''
-
+if write_fasta:
+    f.close()
