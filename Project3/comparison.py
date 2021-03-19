@@ -2,6 +2,7 @@ import os
 import numpy as np
 import sys
 from Bio import SeqIO
+import matplotlib.pyplot as plt
 
 list_seq = []
 for i in range(20):
@@ -82,5 +83,18 @@ for i in range(20):
 print(scores_exact)
     
 #scores_exact = [70.0, 135.0, 231.0, 318.0, 385.0, 440.0, 516.0, 589.0, 628.0, 687.0, 754.0, 810.0, 895.0, 957.0, 1023.0, 1080.0, 1186.0, 1158.0, 1323.0, 1379.0]
+   
+### Plot ###
+xs = []
+for i in range(20):
+    xs.append((i+1)*10)
+scores_exact = [70.0, 135.0, 231.0, 318.0, 385.0, 440.0, 516.0, 589.0, 628.0, 
+                687.0, 754.0, 810.0, 895.0, 957.0, 1023.0, 1080.0, 1186.0, 
+                1158.0, 1323.0, 1379.0]
+scores_approx = [70,135,246,328,416,491,558,648,701,727,820,910,991,1022,
+                 1112,1168,1294,1243, 1458, 1494]
+ys = []
+for i in range(20):
+    ys.append((scores_approx[i]/scores_exact[i])/(4/3))
     
-    
+plt.plot(xs,ys)
