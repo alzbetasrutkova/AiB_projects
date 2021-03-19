@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+import random
 import Bio
 from Bio import SeqIO
 
@@ -8,7 +9,7 @@ def star_align(seqs,subst_m, gap_cost):
     subst_mat = read_subst_mtrx(subst_m)
     seqs_dic = read_FASTA(seqs)
     S = dic_to_list(seqs_dic)
-    
+
     S1,S = find_center_seq(S, gap_cost, subst_mat)
     #print("the center seq is:")
     #print(map_back(S1,seqs_dic))
@@ -35,6 +36,18 @@ def dic_to_list(d):
     for seq in d.values():
         l.append(list(seq))
     return l
+
+#helper function to translate non-nucleotides to nulceotides (ACGT)
+def replace_discrepancy(seq):
+    nucl = set('ACGT')
+    map_nucl = {}
+    seq = list(seq)
+    for i in range(len(seq)):
+        if seq[i] not in nucl:
+            if seq[i] not in map_nucl:
+                map_nucl[seq[i]] = random.sample(nucl,1)
+            seq[i]=''.join(map_nucl[seq[i]])
+    return ''.join(seq)
 
 #helper function which splits an array to smaller arrays of a given size
 def split_arr(arr, size):
@@ -149,7 +162,7 @@ def IterBackTrack(seq1, seq2, gap_cost, subst_mat, T):
 def read_FASTA(filename):
     records_dict = {}
     for seq_record in SeqIO.parse(filename, "fasta"):
-        records_dict[seq_record.id] = seq_record.seq        
+        records_dict[seq_record.id] = replace_discrepancy(str(seq_record.seq))  
     return records_dict
 
 def read_subst_mtrx(filename):
