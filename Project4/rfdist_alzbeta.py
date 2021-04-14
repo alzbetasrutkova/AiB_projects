@@ -102,8 +102,20 @@ print(intervals_t1)
 print(intervals_t2)
 
 ###Step 5
-to_be_sorted = intervals_t1 + intervals_t2
-print(to_be_sorted)
+l1 = sorted(intervals_t1)
+l2 = sorted(intervals_t2)
+i=0
+j=0
+share = 0
+while i<len(l1) and j<len(l2):
+    if l1[i]==l2[j]:
+        share+=1
+        i+=1
+        j+=1
+    else : 
+        i+=1
+
+print(2*len(l1)-2*share)
 '''
 
 ###Step 4
