@@ -33,6 +33,6 @@ def tree_contruct_nj(dict_subst, mat ):
 
 
 ### main ###
-matr_filename = "C:\\Users\\alzbe\\Documents\\AU_Bioinfo_Masters\\Spring_2021\\AiB\\Projects\\Project_05\\example_slide4.phy"
+matr_filename = "C:\Users\awila\Downloads\example_slide4.phy"
 
 print(read_subst_mtrx(matr_filename))
