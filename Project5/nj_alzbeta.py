@@ -3,8 +3,9 @@ import numpy as np
 from ete3 import Tree
 
 
-#an improved version of the matrix reader for project_3
-def read_subst_mtrx(filename):
+#an improved version of the read_subst_mtrx from project_3
+#returns the matrix and a dictionary mapping the species name to indeces
+def read_mtrx(filename):
     f = open(filename,'r')
     num_species = int(f.readline())
 
@@ -15,24 +16,27 @@ def read_subst_mtrx(filename):
         line = f.readline()
         nums_in_line = line.split()
         dict_mat[nums_in_line[0]] = i
-        for j in range(1,num_species):
+        for j in range(1,num_species +1):
             mat[i,j-1] = nums_in_line[j]
     f.close()
     return dict_mat, mat 
 
+def compute_mat():
+    pass
 
 def tree_contruct_nj(dict_subst, mat ):
     start = True
 
     while(dict_mat.size > 3):
-        if start:
-            mat = 
+        if not start:
+            mat = compute_mat()
             start = False
             pass
         else:
+            pass
 
 
 ### main ###
 matr_filename = "C:\\Users\\alzbe\\Documents\\AU_Bioinfo_Masters\\Spring_2021\\AiB\\Projects\\Project_05\\example_slide4.phy"
 
-print(read_subst_mtrx(matr_filename))
+print(read_mtrx(matr_filename))
