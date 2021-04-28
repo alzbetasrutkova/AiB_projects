@@ -142,7 +142,7 @@ def tree_construct_nj(dict_species, D, t_newick ):
 
 
 ### main ###
-matr_filename = "C:\\Users\\alzbe\\Documents\\AU_Bioinfo_Masters\\Spring_2021\\AiB\\Projects\\Project_05\\example_slide4.phy"
+matr_filename = "C:\Users\awila\Downloads\example_slide4.phy"
 
 dict_species, D = read_mtrx(matr_filename)
 
