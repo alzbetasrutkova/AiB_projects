@@ -3,7 +3,7 @@
 import os
 import time
 
-['89_Adeno_E3_CR1.phy',
+dist_matrix = ['89_Adeno_E3_CR1.phy',
  '877_Glu_synthase.phy',
  '777_Gemini_V1.phy',
  '608_Gemini_AL2.phy',
@@ -18,7 +18,7 @@ import time
  '1493_Fe-ADH.phy',
  '1347_FAINT.phy']
 
-"""times = []
+times = []
 for i in range(len(dist_matrix)):
     file = dist_matrix[i]
     order = "python3 NJ.py " + file
@@ -26,4 +26,4 @@ for i in range(len(dist_matrix)):
     os.system(order)
     times.append(time.time() - start_time)
     print(i,times[i])
-print (times)"""
+print (times)
