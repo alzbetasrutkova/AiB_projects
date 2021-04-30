@@ -25,4 +25,5 @@ for i in range(len(dist_matrix)):
     start_time = time.time()
     os.system(order)
     times.append(time.time() - start_time)
+    print(i,times[i])
 print (times)

@@ -22,40 +22,33 @@ def read_mtrx(filename):
 def step1(dist):
     S = len(dist.columns)
     N = pd.DataFrame(columns=dist.columns, index = dist.index)
-    ris = []
+    rs = []
     for i in dist.index:
         ri = 0
         for j in dist.columns:
             ri +=dist.loc[i,j]
-        ris.append(ri/(S-2))
-    
-    rjs = []
-    for j in dist.columns:
-        rj = 0
-        for i in dist.index:
-            rj +=dist.loc[i,j]
-        rjs.append(rj/(S-2))
-        
+        rs.append(ri/(S-2))
+            
     minN = sys.maxsize
     mini = dist.index[0]
     minj = dist.columns[1]
-    rimin = ris[0]
-    rjmin = rjs[1]
+    rimin = rs[0]
+    rjmin = rs[1]
     index_mini = 0
     index_minj = 1
     for i in range(len(dist.index)):
         for j in range(len(dist.columns)):
             ci = dist.index[i]
             cj = dist.columns[j]
-            nij = dist.loc[ci,cj]-ris[i]-rjs[j]
+            nij = dist.loc[ci,cj]-rs[i]-rs[j]
             N.loc[ci,cj]=nij
             if ci != cj:
                 if nij<minN : 
                     minN = nij
                     mini = ci
                     minj = cj
-                    rimin = ris[i]
-                    rjmin = rjs[j]
+                    rimin = rs[i]
+                    rjmin = rs[j]
                     index_mini = i
                     index_minj = j
     return(index_mini, index_minj, mini,minj,minN,rimin,rjmin)
