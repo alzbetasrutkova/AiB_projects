@@ -21,9 +21,11 @@ dist_matrix = ['89_Adeno_E3_CR1.phy',
 times = []
 for i in range(len(dist_matrix)):
     file = dist_matrix[i]
-    order = "python3 NJ.py " + file
+    order = "python3 project5_numpy.py " + file
     start_time = time.time()
     os.system(order)
     times.append(time.time() - start_time)
     print(i,times[i])
 print (times)
+
+# times = [0.6804704666137695, 311.48744106292725, 123.53081893920898, 58.615458965301514, 32.855236530303955, 16.757259368896484, 7.541655778884888, 2.7409214973449707, 1686.475982427597, 1435.3768684864044, 1271.1676616668701, 1000.0718369483948, 872.0920331478119, 639.3578417301178]
