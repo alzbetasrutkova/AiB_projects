@@ -106,18 +106,19 @@ def NJ(dist_mat):
 
 write_fasta = False
 
-if len(sys.argv) == 2:
+if len(sys.argv) == 3:
     write_fasta = True
     filename = sys.argv[2]
-else : 
-    filename = sys.argv[1]
-    
-tree = NJ(filename)
-
-if write_fasta==True:
+    tree = NJ(filename)
+    print(tree)
     name = filename[:-4]
     f = open(name + '_NJtree.newick','w')
     f.write(tree)
     f.close()
+else : 
+    filename = sys.argv[1]
+    tree = NJ(filename)
+    print(tree)
+
     
 
