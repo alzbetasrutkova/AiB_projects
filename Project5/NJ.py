@@ -79,8 +79,8 @@ def NJ(dist_mat):
         nodes2 = nodes_length.copy()
         nodes_length.remove(nodes2[index_mini])
         nodes_length.remove(nodes2[index_minj])
-        dik = round((dist[index_mini,index_minj] + rimin - rjmin)/2,4)
-        djk = round((dist[index_mini,index_minj] + rjmin - rimin)/2,4)
+        dik = (dist[index_mini,index_minj] + rimin - rjmin)/2
+        djk = (dist[index_mini,index_minj] + rjmin - rimin)/2
         nodes_length.append('(' + nodes2[index_mini] + ': '+ str(dik) + ','+ nodes2[index_minj]+ ": "+ str(djk) + ')')
       
         # step 4
