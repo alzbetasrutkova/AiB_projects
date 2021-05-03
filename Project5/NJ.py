@@ -1,6 +1,11 @@
-## NJ
+# -*- coding: utf-8 -*-
+"""
+Created on Sun May  2 10:04:59 2021
+
+@author: lenab
+"""
+
 import numpy as np
-import pandas as pd
 import sys
 
 def read_mtrx(filename):
@@ -20,59 +25,52 @@ def read_mtrx(filename):
     return dict_mat, mat 
 
 def step1(dist):
-    S = len(dist.columns)
-    N = pd.DataFrame(columns=dist.columns, index = dist.index)
+    S = dist.shape[1]
+    N = np.zeros((S,S))
     rs = []
-    for i in dist.index:
+  
+    for i in range(S):
         ri = 0
-        for j in dist.columns:
-            ri +=dist.loc[i,j]
+        for j in range(S):
+            ri +=dist[i,j]
         rs.append(ri/(S-2))
-            
+          
     minN = sys.maxsize
-    mini = dist.index[0]
-    minj = dist.columns[1]
-    rimin = rs[0]
-    rjmin = rs[1]
     index_mini = 0
     index_minj = 1
-    for i in range(len(dist.index)):
-        for j in range(len(dist.columns)):
-            ci = dist.index[i]
-            cj = dist.columns[j]
-            nij = dist.loc[ci,cj]-rs[i]-rs[j]
-            N.loc[ci,cj]=nij
-            if ci != cj:
+   
+    for i in range(S):
+        for j in range(S):
+            nij = dist[i,j]-rs[i]-rs[j]
+            N[i,j]=nij
+            if i != j:
                 if nij<minN : 
                     minN = nij
-                    mini = ci
-                    minj = cj
-                    rimin = rs[i]
-                    rjmin = rs[j]
                     index_mini = i
                     index_minj = j
-    return(index_mini, index_minj, mini,minj,minN,rimin,rjmin)
+    rimin = rs[index_mini]
+    rjmin = rs[index_minj]
+    return(index_mini, index_minj,rimin,rjmin)
+
 
 def NJ(dist_mat):
     # create the distance dataframe
     species_dict, dist = read_mtrx(dist_mat)
     species = list(species_dict.keys())
-    dict_dist = {}
-    for i in range(len(species)) :
-        dict_dist[species[i]] = dist[i]
-    dist=pd.DataFrame.from_dict(dict_dist, orient='index', columns=species) 
-    
     # initializing variables
-    nodes_length = list(dist.index).copy()
-    nodes = list(dist.index).copy()
+    nodes_length = species.copy()
+    nodes = species.copy()
     
-    while len(dist.index)>3 : 
+    while len(nodes)>3 : 
         
         #step 1 
-        index_mini, index_minj,mini,minj, minN,rimin, rjmin = step1(dist)
+        index_mini, index_minj, rimin, rjmin = step1(dist)
         
         # step 2 
-        nodes = list(dist.index).copy()
+        #nodes = list(dist.index).copy()
+        nodes_copy = nodes.copy()
+        mini = nodes[index_mini]
+        minj = nodes[index_minj]
         nodes.remove(mini)
         nodes.remove(minj)
         nodes.append('('+mini+','+minj+')')
@@ -81,29 +79,45 @@ def NJ(dist_mat):
         nodes2 = nodes_length.copy()
         nodes_length.remove(nodes2[index_mini])
         nodes_length.remove(nodes2[index_minj])
-        dik = round((dist.loc[mini,minj] + rimin - rjmin)/2,4)
-        djk = round((dist.loc[mini,minj] + rjmin - rimin)/2,4)
+        dik = round((dist[index_mini,index_minj] + rimin - rjmin)/2,4)
+        djk = round((dist[index_mini,index_minj] + rjmin - rimin)/2,4)
         nodes_length.append('(' + nodes2[index_mini] + ': '+ str(dik) + ','+ nodes2[index_minj]+ ": "+ str(djk) + ')')
-        
+      
         # step 4
-        k = nodes[-1]
-        for i in dist.index : 
-            if i != mini and i!=minj : 
-                dist.loc[i,k] = (dist.loc[mini,i]+dist.loc[minj,i]-dist.loc[mini,minj])/2
-                dist.loc[k,i] = (dist.loc[mini,i]+dist.loc[minj,i]-dist.loc[mini,minj])/2
-        dist.loc[k,k]=0
-        dist = dist.drop(index = [mini,minj], columns = [mini,minj])
-        
+        newrow = []
+        for i in range(len(nodes_copy)) :
+            dik2 = (dist[index_mini,i]+dist[index_minj,i]-dist[index_mini,index_minj])/2
+            newrow.append(dik2)
+        dist = np.vstack([dist,newrow])
+        newrow.append(0)
+        newrow = np.array((newrow))
+        dist = np.c_[dist,newrow]
+        dist = np.delete(dist, np.s_[index_mini, index_minj], axis=0)
+        dist = np.delete(dist, np.s_[index_mini, index_minj], axis=1)
+    
     # Termination step
-    i = nodes[0]
-    j = nodes[1]
-    m = nodes[2]
-    dvi = (dist.loc[i,j]+dist.loc[i,m]-dist.loc[j,m])/2
-    dvj = (dist.loc[i,j]+dist.loc[j,m]-dist.loc[i,m])/2
-    dvm = (dist.loc[i,m]+dist.loc[j,m]-dist.loc[i,j])/2
+    dvi = (dist[0,1]+dist[0,2]-dist[1,2])/2
+    dvj = (dist[0,1]+dist[1,2]-dist[0,2])/2
+    dvm = (dist[0,2]+dist[1,2]-dist[0,1])/2
     tree = "("+nodes_length[0]+":"+str(dvi)+", "+nodes_length[1]+":"+str(dvj)+", "+nodes_length[2]+":"+str(dvm)+")"
     return (tree)
 
 ########## MAIN ##########
-filename = sys.argv[1]
-print(NJ(filename))
+
+write_fasta = False
+
+if len(sys.argv) == 2:
+    write_fasta = True
+    filename = sys.argv[2]
+else : 
+    filename = sys.argv[1]
+    
+tree = NJ(filename)
+
+if write_fasta==True:
+    name = filename[:-4]
+    f = open(name + '_NJtree.newick','w')
+    f.write(tree)
+    f.close()
+    
+
