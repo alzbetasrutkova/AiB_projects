@@ -72,6 +72,9 @@ else:
     pairs = pairs_right
 
 print(pairs)
+print(score_left)
+print(score_right)
+
 #print(pairs[0][0])
 
 directions = ""
@@ -133,7 +136,7 @@ for i in range(len(pairs)-1, 0, -1):
             while(j > 0):
                 directions = directions + "f"
                 j = j - 1
-
+print(seq_in)
 print(directions)
              
 
