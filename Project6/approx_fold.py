@@ -52,11 +52,12 @@ def find_score_and_pairs(seq_odd_even, evens_left = True):
     return score, pairs
 
 ### main ###
-#seq_in = sys.argv[1]
+seq_in = sys.argv[1]
 
 #assign the odd/even labels
 #seq_in = "hphhhhhh"
-seq_in = "hhppppphhppphppphp"
+#seq_in = "hhppppphhppphppphp"
+#seq_in = "hphphhhppphhhhpphh"
 seq_odd_even = odds_evens(seq_in)
 #print(seq_odd_even)
 
@@ -71,9 +72,9 @@ if score_left >= score_right:
 else:
     pairs = pairs_right
 
-print(pairs)
-print(score_left)
-print(score_right)
+#print(pairs)
+#print(score_left)
+#print(score_right)
 
 #print(pairs[0][0])
 
@@ -93,26 +94,27 @@ for i in range(0, len(pairs)):
             directions = directions + "ff"
         else:
             #there is always an odd num of elements between two matches        
-            left_part = (between / 2) - 1
+            left_part = (between // 2) - 1
             j = left_part
             directions = directions + "l"
             while(j > 0):
                 directions = directions + "f"
                 j = j - 1
-            directions = directions + "r"
+            directions = directions + "rr"
             j = left_part
             while(j > 0):
                 directions = directions + "f"
                 j = j - 1
+            directions = directions + "l"
 
 #creating the main fold:
 between_s1_s2 = pairs[len(pairs)-1][1] - pairs[len(pairs)-1][0] - 1
-j = between_s1_s2 / 2
+j = between_s1_s2 // 2
 while(j > 0):
     directions = directions + "f"
     j = j-1
 directions = directions + "rr"
-j = (between_s1_s2 / 2) - 1
+j = (between_s1_s2 // 2) - 1 
 while(j > 0):
     directions = directions + "f"
     j = j-1
@@ -125,18 +127,35 @@ for i in range(len(pairs)-1, 0, -1):
             directions = directions + "ff"
         else:
             #there is always an odd num of elements between two matches        
-            left_part = (between / 2) - 1
+            left_part = (between // 2) - 1
             j = left_part
             directions = directions + "l"
             while(j > 0):
                 directions = directions + "f"
                 j = j - 1
-            directions = directions + "r"
+            directions = directions + "rr"
             j = left_part
             while(j > 0):
                 directions = directions + "f"
                 j = j - 1
-print(seq_in)
+            directions = directions + "l"
+
+last_matched = pairs[0][1]
+
+#print(last_matched)
+
+while last_matched != len(seq_in) - 1:
+    directions = directions + "f"
+    last_matched = last_matched + 1
+
+#print(len(seq_in))
+#print(len(directions))
+
+#not a nice way how to fix one bug, would be nice to improve
+if len(directions) == len(seq_in):
+    directions = directions[0:len(directions)-1]
+
+#print(seq_in)
 print(directions)
              
 
