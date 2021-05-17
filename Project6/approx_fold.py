@@ -149,24 +149,60 @@ class HPFold:
         Print fold and output its score
         """
         score = 0
+        #print()
         for i in range(self.min_i, self.max_i+1):
             for j in range(self.min_j, self.max_j+1):
                 if (i,j) in self.grid.keys():
-                    l1 = self.grid[i,j]            
+                    l1 = self.grid[i,j]
+                    if len(l1) == 1:
+                        pass
+                        #print(self.seq[l1[0]], end="")
+                    else:
+                        pass
+                        #print("X", end="")
                     if (i,j+1) in self.grid.keys():
                         l2 = self.grid[i,j+1]
-                        if self.ContainHHs(l1, l2):                           
-                            score = score + 1                       
+                        if self.ContainNeighbors(l1,l2):
+                            pass
+                            #print("-", end="")
+                        elif self.ContainHHs(l1, l2):
+                            #print("*", end="")
+                            score = score + 1
+                        else:
+                            pass
+                            #print(" ", end="")
+                    else:
+                        pass
+                        #print(" ", end="")
+                else:
+                    pass
+                    #print(".", end="")
+                    #print(" ", end="")
+            
 
             for j in range(self.min_j, self.max_j+1):
                 if (i,j) in self.grid.keys() and (i+1,j) in self.grid.keys():
                     l1 = self.grid[i,j]
                     l2 = self.grid[i+1,j]
-                    
-                    if self.ContainHHs(l1,l2):
-                        score = score + 1           
+                    if self.ContainNeighbors(l1,l2):
+                        pass
+                        #print("|", end="")
+                    elif self.ContainHHs(l1,l2):
+                        #print("*", end="")
+                        score = score + 1
+                    else:
+                        pass
+                        #print(" ", end="")
+                else:
+                    pass
+                    #print(" ", end="")
+                #print(" ", end="")
+            #print()
 
-        print("Score: %d" % (score))
+        if self.legal_fold[0]:
+            print("Score: %d" % (score))
+        else:
+            print("Illegal fold after %d steps" % (self.legal_fold[1]))
        
 
 #####################################################################
@@ -264,7 +300,7 @@ while last_matched != len(seq_in) - 1:
 
 #not a nice way how to fix one bug, would be nice to improve
 if len(directions) == len(seq_in):
-    directions = directions[0:len(directions)-1]
+    directions = directions[0:len(directions) - 1]
 
 #print(seq_in)
 print("Fold:", directions)
